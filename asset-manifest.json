@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.e6c13ad2.css",
-    "main.js": "/static/js/main.4aff1246.js",
-    "index.html": "/index.html",
-    "main.e6c13ad2.css.map": "/static/css/main.e6c13ad2.css.map",
-    "main.4aff1246.js.map": "/static/js/main.4aff1246.js.map"
+    "main.css": "/acai-app/static/css/main.e6c13ad2.css",
+    "main.js": "/acai-app/static/js/main.4aff1246.js",
+    "index.html": "/acai-app/index.html",
+    "main.e6c13ad2.css.map": "/acai-app/static/css/main.e6c13ad2.css.map",
+    "main.4aff1246.js.map": "/acai-app/static/js/main.4aff1246.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
