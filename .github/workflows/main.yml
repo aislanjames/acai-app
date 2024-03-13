@@ -25,9 +25,9 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages  # The branch the action should deploy to.
-          folder: acai-app/build     # The folder the action should deploy.
-          token: ${{ secrets.DEPLOY_TOKEN }}  # Usa o GITHUB_TOKEN para autenticação
-        
+          branch: gh-pages
+          folder: build
+          token: ${{ secrets.DEPLOY_TOKEN }}
+      
     
     
