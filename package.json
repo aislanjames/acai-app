@@ -2,7 +2,6 @@
   "name": "acai-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://aislanjames.github.io/venda-de-acai/",
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@reduxjs/toolkit": "^2.2.1",
