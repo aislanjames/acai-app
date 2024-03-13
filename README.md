@@ -1,2 +1,3 @@
-# Desafio realizado para vaga de Dev.
-## Front de APP para venda de Açaí
+# Front de APP para venda de Açaí
+## Melhorias serão aplicadas em breve
+* Refazer utilizando SASS
