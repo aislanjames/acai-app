@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { acaiSchema } from '../../validation';
 import { useDispatch } from 'react-redux';
@@ -9,11 +9,12 @@ import Footer from '../../components/Footer/Footer';
 import RadioTamanho from '../../components/Home/RadioTamanho';
 import RadioFruta from '../../components/Home/RadioFruta';
 import CheckboxComplementos from '../../components/Home/CheckboxComplementos';
-import './Home.css';
+import BotaoVoltar from '../../components/BotaoVoltar';
+import '../../components/Home/Home.css';
 
 type FormValues = {
     tamanho: 'PEQUENO' | 'MEDIO' | 'GRANDE';
-    sabor: 'MORANGO' | 'BANANA' | 'KIWI';
+    sabor: string;
     complementos: {
         granola: boolean;
         pacoca: boolean;
@@ -24,59 +25,79 @@ type FormValues = {
 export const Home = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { register, handleSubmit, watch, formState: { errors } } = useForm<FormValues>({
+    const [quantidade, setQuantidade] = useState(1);
+    const [valorTotal, setValorTotal] = useState(10); // Inicializa com o valor para 'PEQUENO'
+    const [etapaAtual, setEtapaAtual] = useState(1); // Controle de etapas para o "slider"
+
+    const { register, watch, formState: { errors } } = useForm<FormValues>({
+        defaultValues: {
+            tamanho: 'PEQUENO',
+            sabor: '',
+            complementos: {},
+        },
         resolver: zodResolver(acaiSchema),
     });
 
-    const [showFooter, setShowFooter] = useState(false);
-    const sabor = watch("sabor");
     const tamanho = watch("tamanho");
+    const sabor = watch("sabor");
     const complementos = watch("complementos");
-    const [valorTotal, setValorTotal] = useState(0);
-    const [quantidade, setQuantidade] = useState(1);
 
     useEffect(() => {
-        const allFieldsFilled = sabor && tamanho && Object.values(complementos || {}).some(v => v); // Corrigido para garantir que complementos não seja undefined
-        setShowFooter(allFieldsFilled);
-
-        let baseValor = tamanho === 'PEQUENO' ? 10 : tamanho === 'MEDIO' ? 12 : tamanho === 'GRANDE' ? 15 : 0;
-        const complementoValor = Object.values(complementos || {}).filter(Boolean).length * 3; // Corrigido para garantir que complementos não seja undefined
-        const total = (baseValor + complementoValor) * quantidade;
-
+        let baseValor = tamanho === 'PEQUENO' ? 10 : tamanho === 'MEDIO' ? 12 : 15;
+        let complementoValor = 0;
+    
+        if (complementos.granola) complementoValor += 3;
+        if (complementos.pacoca) complementoValor += 5;
+        if (complementos.leiteninho) complementoValor += 4;
+    
+        let total = (baseValor + complementoValor) * quantidade;
         setValorTotal(total);
-    }, [sabor, tamanho, complementos, quantidade]);
+    }, [tamanho, quantidade, complementos.granola, complementos.pacoca, complementos.leiteninho]);
+    
+    const onSubmitData = () => {
+        const complementosSelecionados = [];
+        if (complementos.granola) complementosSelecionados.push('Granola');
+        if (complementos.pacoca) complementosSelecionados.push('Paçoca');
+        if (complementos.leiteninho) complementosSelecionados.push('Leite Ninho');
 
-    const onSubmit: SubmitHandler<FormValues> = (data) => {
-        const complementosSelecionados = Object.entries(data.complementos)
-            .filter(([_, value]) => value)
-            .map(([key]) => key)
-            .join(', ');
-
-        // Altere aqui conforme a estrutura esperada pelo seu slice do Redux
         const payload = {
-            ...data,
-            complemento: complementosSelecionados, // Ajustando para o formato esperado
+            tamanho,
+            sabor,
+            complemento: complementosSelecionados.join(', ') || 'NENHUM',
+            valorTotal: valorTotal.toFixed(2),
         };
 
         dispatch(setPedido(payload));
         navigate('/pedido');
     };
 
+    const avancarParaProximaEtapa = () => {
+        if (etapaAtual < 3) {
+            setEtapaAtual(etapaAtual + 1);
+        } else {
+            onSubmitData();
+        }
+    };
+
+    const voltarEtapa = () => {
+        if (etapaAtual > 1) {
+            setEtapaAtual(etapaAtual - 1);
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => e.preventDefault()}>
+            <BotaoVoltar onClick={voltarEtapa} />
             <h1>Açaí Natural</h1>
-            
-            <RadioFruta register={register} />
-            {errors.sabor && <p>O sabor é obrigatório.</p>}
-
-            <RadioTamanho register={register} />
-            {errors.tamanho && <p>O tamanho é obrigatório.</p>}
-
-            <CheckboxComplementos register={register} />
-
-            {showFooter && (
-                <Footer onSubmit={handleSubmit(onSubmit)} valorTotal={`R$ ${valorTotal.toFixed(2)}`} quantidade={quantidade} setQuantidade={setQuantidade} />
-            )}
+            {etapaAtual === 1 && <RadioTamanho register={register} />}
+            {etapaAtual === 2 && <RadioFruta register={register} />}
+            {etapaAtual === 3 && <CheckboxComplementos register={register} />}
+            <Footer
+                onSubmit={avancarParaProximaEtapa}
+                valorTotal={`R$ ${valorTotal.toFixed(2)}`}
+                quantidade={quantidade}
+                setQuantidade={setQuantidade}
+            />
         </form>
     );
 };

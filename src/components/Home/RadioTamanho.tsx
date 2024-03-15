@@ -6,13 +6,19 @@ interface RadioTamanhoProps {
 
 const RadioTamanho: React.FC<RadioTamanhoProps> = ({ register }) => {
     return (
-        <div>
-            <label>Pequeno</label>
-            <input {...register("tamanho")} type="radio" value="PEQUENO" />
-            <label>Médio</label>
-            <input {...register("tamanho")} type="radio" value="MEDIO" />
-            <label>Grande</label>
-            <input {...register("tamanho")} type="radio" value="GRANDE" />
+        <div id='tamanhos' className="itens">
+            <div id="tamanho_pequeno">
+                <label>Pequeno</label>
+                <input {...register("tamanho")} type="radio" value="PEQUENO" />
+            </div>
+            <div id="tamanho_medio">
+                <label>Médio</label>
+                <input {...register("tamanho")} type="radio" value="MEDIO" />
+            </div>
+            <div id="tamanho_grande">
+                <label>Grande</label>
+                <input {...register("tamanho")} type="radio" value="GRANDE" />
+            </div>
         </div>
     );
 };

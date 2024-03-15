@@ -1,32 +1,34 @@
+// src/features/pedido/pedidoSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../../app/store';
 
 interface PedidoState {
+  tamanho: 'PEQUENO' | 'MEDIO' | 'GRANDE' | '';
   sabor: string;
-  tamanho: string;
   complemento: string;
+  valorTotal: string;
 }
 
+// Aqui é onde definimos o estado inicial baseado na interface acima
 const initialState: PedidoState = {
-  sabor: '',
   tamanho: '',
+  sabor: '',
   complemento: '',
+  valorTotal: '',
 };
 
 export const pedidoSlice = createSlice({
   name: 'pedido',
-  initialState,
+  initialState, // Aqui estamos passando o objeto initialState corretamente
   reducers: {
     setPedido: (state, action: PayloadAction<PedidoState>) => {
-      state.sabor = action.payload.sabor;
-      state.tamanho = action.payload.tamanho;
-      state.complemento = action.payload.complemento;
+      // Com o spread operator, atualizamos todo o estado de uma só vez
+      return { ...state, ...action.payload };
     },
   },
 });
 
 export const { setPedido } = pedidoSlice.actions;
-
-export const selectPedido = (state: RootState) => state.pedido;
-
 export default pedidoSlice.reducer;
+
+// Ajuste o seletor conforme a estrutura do seu store
+export const selectPedido = (state: { pedido: PedidoState }) => state.pedido;
