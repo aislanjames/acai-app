@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectPedido } from '../../features/pedido/pedidoSlice';
+import './Pedido.css';
 
 export const Pedido = () => {
     // Acessa o estado do pedido usando o useSelector e o seletor selectPedido
