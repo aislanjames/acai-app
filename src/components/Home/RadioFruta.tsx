@@ -1,26 +1,23 @@
 import React from 'react';
+import { Produto } from '../../features/types/index'; 
 
 interface RadioFrutaProps {
-    register: any;
+  register: any;
+  sabores: Produto[];
 }
 
-const RadioFruta: React.FC<RadioFrutaProps> = ({ register }) => {
-    return (
-        <div id='sabor' className='itens'>
-            <div id="fruta_morango">
-                <label>Morango</label>
-                <input {...register("sabor")} type="radio" value="MORANGO" />
-            </div>
-            <div id="fruta_banana">
-                <label>Banana</label>
-                <input {...register("sabor")} type="radio" value="BANANA" />
-            </div>
-            <div id="fruta_kiwi">
-                <label>Kiwi</label>
-                <input {...register("sabor")} type="radio" value="KIWI" />
-            </div>
+const RadioFruta: React.FC<RadioFrutaProps> = ({ register, sabores }) => {
+  return (
+    <div id='sabor' className='itens'>
+      {sabores.map((sabor) => (
+        <div key={sabor.id} id={`fruta_${sabor.nome.toLowerCase()}`}>
+          <label>{sabor.nome}</label>
+          <input {...register("sabor")} type="radio" value={sabor.nome} />
+          {/* <img src={sabor.avatar} alt={sabor.nome} /> */}
         </div>
-    );
+      ))}
+    </div>
+  );
 };
 
 export default RadioFruta;

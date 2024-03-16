@@ -1,18 +1,25 @@
 #footer,
-.footer-mobile {
+.footer-mobile #buttons {
     width: auto;
     height: 64px;
     gap: 8px;
 }
 
 .footer-mobile {
+    position: relative;
+}
+
+.footer-mobile #buttons {
     border-top: 1px solid var(--borda-cinza);
     box-shadow: 0px -8px 5px 9px #00000000;
     transition: transform 0.5s ease-in-out;
     display: flex;
+    padding-top: 16px;
+    position: fixed;
+    bottom: 0;
 }
 
-.footer-mobile.hidden {
+.footer-mobile #buttons.hidden {
     transform: translateY(100%);
 }
 
@@ -37,18 +44,18 @@
     justify-content: space-between;
 }
 
-.footer-mobile, #opcao-de-quantidade,
+.footer-mobile #buttons, #opcao-de-quantidade,
 #btn-avancar {
     display: flex;
 }
 
-#footer, .footer-mobile, #opcao-de-quantidade,
+#opcao-de-quantidade,
 #btn-avancar {
     padding: 16px 12px;
 }
 
 @media (min-width: 768px) {
-    .footer-mobile {
+    .footer-mobile #buttons {
         display: none;
     }
 }

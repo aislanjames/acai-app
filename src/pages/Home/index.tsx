@@ -5,77 +5,79 @@ import { acaiSchema } from '../../validation';
 import { useDispatch } from 'react-redux';
 import { setPedido } from '../../features/pedido/pedidoSlice';
 import { useNavigate } from 'react-router-dom';
-import Footer from '../../components/Footer/Footer';
+import { fetchProdutos } from '../../services/mockApi';
+import { Produto } from '../../features/types/index';
 import RadioTamanho from '../../components/Home/RadioTamanho';
 import RadioFruta from '../../components/Home/RadioFruta';
 import CheckboxComplementos from '../../components/Home/CheckboxComplementos';
+import Footer from '../../components/Footer/Footer';
 import BotaoVoltar from '../../components/BotaoVoltar';
+import produtoImg from '../../assets/img/Banner.png';
 import '../../components/Home/Home.css';
 
 type FormValues = {
-    tamanho: 'PEQUENO' | 'MEDIO' | 'GRANDE';
+    tamanho: string;
     sabor: string;
-    complementos: {
-        granola: boolean;
-        pacoca: boolean;
-        leiteninho: boolean;
-    };
+    complementos: Record<string, boolean>;
 };
 
 export const Home = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [quantidade, setQuantidade] = useState(1);
-    const [valorTotal, setValorTotal] = useState(10); // Inicializa com o valor para 'PEQUENO'
-    const [etapaAtual, setEtapaAtual] = useState(1); // Controle de etapas para o "slider"
+    const [valorTotal, setValorTotal] = useState(0);
+    const [etapaAtual, setEtapaAtual] = useState(1);
+    const [produtos, setProdutos] = useState<Produto[]>([]);
 
-    const { register, watch, formState: { errors } } = useForm<FormValues>({
-        defaultValues: {
-            tamanho: 'PEQUENO',
-            sabor: '',
-            complementos: {},
-        },
+    const { register, handleSubmit, watch, getValues, setValue } = useForm<FormValues>({
         resolver: zodResolver(acaiSchema),
     });
 
-    const tamanho = watch("tamanho");
-    const sabor = watch("sabor");
-    const complementos = watch("complementos");
-
     useEffect(() => {
-        let baseValor = tamanho === 'PEQUENO' ? 10 : tamanho === 'MEDIO' ? 12 : 15;
-        let complementoValor = 0;
-    
-        if (complementos.granola) complementoValor += 3;
-        if (complementos.pacoca) complementoValor += 5;
-        if (complementos.leiteninho) complementoValor += 4;
-    
-        let total = (baseValor + complementoValor) * quantidade;
-        setValorTotal(total);
-    }, [tamanho, quantidade, complementos.granola, complementos.pacoca, complementos.leiteninho]);
-    
-    const onSubmitData = () => {
-        const complementosSelecionados = [];
-        if (complementos.granola) complementosSelecionados.push('Granola');
-        if (complementos.pacoca) complementosSelecionados.push('Paçoca');
-        if (complementos.leiteninho) complementosSelecionados.push('Leite Ninho');
-
-        const payload = {
-            tamanho,
-            sabor,
-            complemento: complementosSelecionados.join(', ') || 'NENHUM',
-            valorTotal: valorTotal.toFixed(2),
+        const loadData = async () => {
+            const produtosData: Produto[] = await fetchProdutos();
+            setProdutos(produtosData);
+            const tamanhoInicial = produtosData.find(p => p.tipo === 'tamanho')?.nome || '';
+            setValue('tamanho', tamanhoInicial);
+            calculateAndUpdateTotal(getValues(), quantidade);
         };
+        loadData();
+    }, []);
 
-        dispatch(setPedido(payload));
+    const calculateAndUpdateTotal = (data: FormValues, quantidade: number) => {
+        let totalValor = 0;
+        // Calcula o valor total com base em data e quantidade
+        // Aqui você irá calcular o totalValor com base no tamanho, sabor, complementos e quantidade
+        setValorTotal(totalValor);
+    };
+
+    const onSubmitData = (data: FormValues) => {
+        const totalValor = calculateAndUpdateTotal(data, quantidade);
+        dispatch(setPedido({
+            tamanho: data.tamanho,
+            sabor: data.sabor,
+            complementos: Object.keys(data.complementos).filter(k => data.complementos[k]).join(', '),
+            valorTotal: totalValor.toString(), // O Redux espera uma string aqui
+        }));
         navigate('/pedido');
     };
+
+    useEffect(() => {
+        const subscription = watch((value) => {
+            calculateAndUpdateTotal(value, quantidade);
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, quantidade]);
+
+    useEffect(() => {
+        calculateAndUpdateTotal(getValues(), quantidade);
+    }, [quantidade]);
 
     const avancarParaProximaEtapa = () => {
         if (etapaAtual < 3) {
             setEtapaAtual(etapaAtual + 1);
         } else {
-            onSubmitData();
+            handleSubmit(onSubmitData)();
         }
     };
 
@@ -86,18 +88,17 @@ export const Home = () => {
     };
 
     return (
-        <form onSubmit={(e) => e.preventDefault()}>
-            <BotaoVoltar onClick={voltarEtapa} />
-            <h1>Açaí Natural</h1>
-            {etapaAtual === 1 && <RadioTamanho register={register} />}
-            {etapaAtual === 2 && <RadioFruta register={register} />}
-            {etapaAtual === 3 && <CheckboxComplementos register={register} />}
-            <Footer
-                onSubmit={avancarParaProximaEtapa}
-                valorTotal={`R$ ${valorTotal.toFixed(2)}`}
-                quantidade={quantidade}
-                setQuantidade={setQuantidade}
-            />
-        </form>
+        <section>
+            {/* Marcação... */}
+            <form className='container' onSubmit={handleSubmit(onSubmitData)}>
+                {/* Componentes... */}
+                <Footer
+                    onSubmit={handleSubmit(onSubmitData)} // Correção: diretamente passar onSubmitData
+                    valorTotal={`R$ ${valorTotal.toFixed(2)}`}
+                    quantidade={quantidade}
+                    setQuantidade={setQuantidade}
+                />
+            </form>
+        </section>
     );
 };

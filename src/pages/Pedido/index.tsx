@@ -3,28 +3,22 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../app/store';
 import './Pedido.css';
 
-
 export const Pedido = () => {
-    // Acessa o estado do pedido usando o useSelector e o seletor selectPedido
     const pedido = useSelector((state: RootState) => state.pedido);
 
-    // Adicione esta função dentro do componente Pedido, antes do return
     const calcularValorETempo = () => {
-        let valor = 0;
+        let valor = pedido.valorTotal; // Utiliza diretamente o valor total calculado anteriormente
         let tempo = 0;
 
-        // Define o valor e o tempo baseado no tamanho
+        // Define o tempo baseado no tamanho
         switch (pedido.tamanho) {
-            case 'PEQUENO':
-                valor += 10;
+            case 'Pequeno - 300ML':
                 tempo += 5;
                 break;
-            case 'MEDIO':
-                valor += 12;
+            case 'Médio - 500ML':
                 tempo += 7;
                 break;
-            case 'GRANDE':
-                valor += 15;
+            case 'Grande - 700ML':
                 tempo += 9;
                 break;
             default:
@@ -32,27 +26,20 @@ export const Pedido = () => {
                 break;
         }
 
-        // Incrementa o valor se houver complemento
-        if (pedido.complemento !== 'NENHUM') {
-            valor += 3; // Assume um valor fixo para simplificação
-        }
-
+        // O valor já inclui os complementos, então não é necessário adicionar novamente
         return { valor, tempo };
     };
 
     const { valor, tempo } = calcularValorETempo();
 
     return (
-        <div>
+        <div className='container'>
             <h2>Meu Pedido</h2>
             <p><strong>Sabor:</strong> {pedido.sabor}</p>
             <p><strong>Tamanho:</strong> {pedido.tamanho}</p>
-            <p><strong>Complemento(s):</strong> {pedido.complemento || 'Nenhum'}</p>
-            <p><strong>Valor Total:</strong> R$ {pedido.valorTotal}</p>
-            <p><strong>Tempo de Entrega Estimado:</strong> {
-                pedido.tamanho === 'PEQUENO' ? '5 minutos' :
-                pedido.tamanho === 'MEDIO' ? '7 minutos' : '9 minutos'
-            }</p>
+            <p><strong>Complemento(s):</strong> {pedido.complementos.join(', ') || 'Nenhum'}</p>
+            <p><strong>Valor Total:</strong> R$ {valor.toFixed(2)}</p> {/* Ajustado para utilizar valor calculado */}
+            <p><strong>Tempo de Entrega Estimado:</strong> {tempo} minutos</p> {/* Ajustado para utilizar tempo calculado */}
         </div>
     );
 };

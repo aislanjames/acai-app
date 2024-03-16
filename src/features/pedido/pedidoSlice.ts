@@ -1,19 +1,17 @@
-// src/features/pedido/pedidoSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface PedidoState {
-  tamanho: 'PEQUENO' | 'MEDIO' | 'GRANDE' | '';
+  tamanho: string;
   sabor: string;
-  complemento: string;
-  valorTotal: string;
+  complementos: string[];
+  valorTotal: number; // Corrigido para ser do tipo number
 }
 
-// Aqui é onde definimos o estado inicial baseado na interface acima
 const initialState: PedidoState = {
   tamanho: '',
   sabor: '',
-  complemento: '',
-  valorTotal: '',
+  complementos: [],
+  valorTotal: 0, // Inicializado como 0, que é um valor number
 };
 
 export const pedidoSlice = createSlice({
@@ -21,7 +19,7 @@ export const pedidoSlice = createSlice({
   initialState, // Aqui estamos passando o objeto initialState corretamente
   reducers: {
     setPedido: (state, action: PayloadAction<PedidoState>) => {
-      // Com o spread operator, atualizamos todo o estado de uma só vez
+      // Atualiza o estado com os novos dados do pedido
       return { ...state, ...action.payload };
     },
   },
