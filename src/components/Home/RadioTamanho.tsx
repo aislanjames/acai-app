@@ -1,5 +1,5 @@
 import React from 'react';
-import { Produto } from '../../features/types/index'; 
+import { Produto } from '../../features/types';
 
 interface RadioTamanhoProps {
   register: any;
@@ -8,13 +8,11 @@ interface RadioTamanhoProps {
 
 const RadioTamanho: React.FC<RadioTamanhoProps> = ({ register, tamanhos }) => {
   return (
-    <div id='tamanhos' className="itens">
+    <div>
       {tamanhos.map((tamanho) => (
-        <div key={tamanho.id} id={`tamanho_${tamanho.nome.toLowerCase()}`}>
+        <div key={tamanho.id}>
           <label>{tamanho.nome}</label>
           <input {...register("tamanho")} type="radio" value={tamanho.nome} />
-          {/* Exemplo de como incluir avatar se necessário */}
-          {/* <img src={tamanho.avatar} alt={tamanho.nome} /> */}
         </div>
       ))}
     </div>

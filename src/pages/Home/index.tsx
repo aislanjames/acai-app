@@ -6,7 +6,6 @@ import { useDispatch } from 'react-redux';
 import { setPedido } from '../../features/pedido/pedidoSlice';
 import { useNavigate } from 'react-router-dom';
 import { fetchProdutos } from '../../services/mockApi';
-import { Produto } from '../../features/types/index';
 import RadioTamanho from '../../components/Home/RadioTamanho';
 import RadioFruta from '../../components/Home/RadioFruta';
 import CheckboxComplementos from '../../components/Home/CheckboxComplementos';
@@ -14,6 +13,14 @@ import Footer from '../../components/Footer/Footer';
 import BotaoVoltar from '../../components/BotaoVoltar';
 import produtoImg from '../../assets/img/Banner.png';
 import '../../components/Home/Home.css';
+
+interface Produto {
+    id: string;
+    tipo: 'tamanho' | 'sabor' | 'complemento';
+    nome: string;
+    valor?: string;
+    avatar: string;
+}
 
 type FormValues = {
     tamanho: string;
@@ -29,7 +36,7 @@ export const Home = () => {
     const [etapaAtual, setEtapaAtual] = useState(1);
     const [produtos, setProdutos] = useState<Produto[]>([]);
 
-    const { register, handleSubmit, watch, getValues, setValue } = useForm<FormValues>({
+    const { register, handleSubmit, watch, formState: { errors }, getValues, setValue } = useForm<FormValues>({
         resolver: zodResolver(acaiSchema),
     });
 
@@ -37,67 +44,58 @@ export const Home = () => {
         const loadData = async () => {
             const produtosData: Produto[] = await fetchProdutos();
             setProdutos(produtosData);
-            const tamanhoInicial = produtosData.find(p => p.tipo === 'tamanho')?.nome || '';
-            setValue('tamanho', tamanhoInicial);
-            calculateAndUpdateTotal(getValues(), quantidade);
         };
+
         loadData();
     }, []);
 
-    const calculateAndUpdateTotal = (data: FormValues, quantidade: number) => {
-        let totalValor = 0;
-        // Calcula o valor total com base em data e quantidade
-        // Aqui você irá calcular o totalValor com base no tamanho, sabor, complementos e quantidade
-        setValorTotal(totalValor);
+    useEffect(() => {
+        if (produtos.length > 0) {
+            const tamanhoInicial = produtos.find(p => p.tipo === 'tamanho')?.nome || '';
+            setValue('tamanho', tamanhoInicial);
+            const formData = getValues();
+            calculateAndUpdateTotal(formData);
+        }
+    }, [produtos, setValue, getValues]);
+
+    const calculateAndUpdateTotal = (formData: FormValues) => {
+        let total = 0;
+        // Implementação do cálculo do total
+        setValorTotal(total);
     };
 
     const onSubmitData = (data: FormValues) => {
-        const totalValor = calculateAndUpdateTotal(data, quantidade);
+        calculateAndUpdateTotal(data);
+        const complementosSelecionados = Object.keys(data.complementos)
+            .filter(key => data.complementos[key]); // Filtra apenas os complementos selecionados
+    
         dispatch(setPedido({
             tamanho: data.tamanho,
             sabor: data.sabor,
-            complementos: Object.keys(data.complementos).filter(k => data.complementos[k]).join(', '),
-            valorTotal: totalValor.toString(), // O Redux espera uma string aqui
+            complementos: complementosSelecionados, // Passa o array de strings
+            valorTotal: valorTotal,
         }));
         navigate('/pedido');
-    };
+    };    
 
     useEffect(() => {
-        const subscription = watch((value) => {
-            calculateAndUpdateTotal(value, quantidade);
+        const subscription = watch(() => {
+            calculateAndUpdateTotal(getValues());
         });
         return () => subscription.unsubscribe();
-    }, [watch, quantidade]);
-
-    useEffect(() => {
-        calculateAndUpdateTotal(getValues(), quantidade);
-    }, [quantidade]);
-
-    const avancarParaProximaEtapa = () => {
-        if (etapaAtual < 3) {
-            setEtapaAtual(etapaAtual + 1);
-        } else {
-            handleSubmit(onSubmitData)();
-        }
-    };
-
-    const voltarEtapa = () => {
-        if (etapaAtual > 1) {
-            setEtapaAtual(etapaAtual - 1);
-        }
-    };
+    }, [watch]);
 
     return (
         <section>
-            {/* Marcação... */}
+            <div id='produto' className='container'>
+                <BotaoVoltar onClick={() => { }} />
+                <img src={produtoImg} alt="Açaí" />
+            </div>
             <form className='container' onSubmit={handleSubmit(onSubmitData)}>
-                {/* Componentes... */}
-                <Footer
-                    onSubmit={handleSubmit(onSubmitData)} // Correção: diretamente passar onSubmitData
-                    valorTotal={`R$ ${valorTotal.toFixed(2)}`}
-                    quantidade={quantidade}
-                    setQuantidade={setQuantidade}
-                />
+                {etapaAtual === 1 && <RadioTamanho register={register} tamanhos={produtos.filter(p => p.tipo === 'tamanho')} />}
+                {etapaAtual === 2 && <RadioFruta register={register} sabores={produtos.filter(p => p.tipo === 'sabor')} />}
+                {etapaAtual === 3 && <CheckboxComplementos register={register} complementos={produtos.filter(p => p.tipo === 'complemento')} />}
+                <Footer onSubmit={() => handleSubmit(onSubmitData)} valorTotal={`R$ ${valorTotal.toFixed(2)}`} quantidade={quantidade} setQuantidade={setQuantidade} />
             </form>
         </section>
     );

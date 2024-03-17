@@ -1,9 +1,9 @@
 import React from 'react';
-import { Produto } from '../../features/types/index'; 
+import { Produto } from '../../features/types'; // Ajuste o caminho conforme necessário
 
 interface CheckboxComplementosProps {
-    register: any;
-    complementos: Produto[];
+  register: any;
+  complementos: Produto[];
 }
 
 const CheckboxComplementos: React.FC<CheckboxComplementosProps> = ({ register, complementos }) => {
@@ -13,8 +13,6 @@ const CheckboxComplementos: React.FC<CheckboxComplementosProps> = ({ register, c
                 <div key={complemento.id} id={`complemento_${complemento.nome.toLowerCase().replace(/\s+/g, '_')}`}>
                     <label htmlFor={`complemento_${complemento.nome}`}>{complemento.nome}</label>
                     <input {...register(`complementos.${complemento.nome.toLowerCase().replace(/\s+/g, '_')}`)} id={`complemento_${complemento.nome}`} type="checkbox" />
-                    {/* Incluir a imagem do complemento se necessário */}
-                    {/* <img src={complemento.avatar} alt={`Imagem de ${complemento.nome}`} /> */}
                 </div>
             ))}
         </div>
